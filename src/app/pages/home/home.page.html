@@ -1,0 +1,138 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title> My Tasks </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+   <div class="pokedex">
+      <div class="panel left-panel">
+         <div class="pokemon-name screen">metapod<span class="name-no">no. 11</span></div>
+         <div class="sprite-image">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png" alt="pokemon" class="pokemon-sprite">
+            <div class="sprite-controls">
+               <div (click)="changeImage('gender')" class="sprite-control sprite-controls-gender "><i class="fas fa-venus"></i></div>
+               <div (click)="changeImage('shiny')" class="sprite-control sprite-controls-shiny "><span>shiny</span></div>
+               <div (click)="changeImage('rotate')" class="sprite-control sprite-controls-rotate "><i class="fas fa-undo"></i></div>
+            </div>
+         </div>
+         <div class="pokemon-description screen">This is its pre-
+            evolved form. At
+            this stage, it canonly harden, so it
+            remains motionless
+            to avoid attack.
+         </div>
+      </div>
+      <div class="divider">
+         <div class="gap"></div>
+         <div class="hinge"></div>
+         <div class="gap"></div>
+         <div class="hinge"></div>
+         <div class="gap"></div>
+         <div class="hinge"></div>
+         <div class="gap"></div>
+      </div>
+      <div class="panel right-panel">
+         <div class="panel-row">
+            <div class="screen stats">
+               <div class="stat-line">
+                  hp................50
+               </div>
+               <div class="stat-line">
+                  attack............20
+               </div>
+               <div class="stat-line">
+                  defense...........55
+               </div>
+               <div class="stat-line">
+                  special-attack....25
+               </div>
+               <div class="stat-line">
+                  special-defense...25
+               </div>
+               <div class="stat-line">
+                  speed.............30
+               </div>
+            </div>
+            <div class="type-list">
+               <div class="panel-header">Types</div>
+               <div class="type-box">
+                  <div class="type bug">bug</div>
+               </div>
+            </div>
+         </div>
+         <div class="panel-row panel-evo">
+            <div>
+               <div class="flex-center">
+                  <div class="evo-num">I</div>
+               </div>
+               <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
+               <div class="screen evo-name">caterpie</div>
+            </div>
+            <div>
+               <div class="flex-center">
+                  <div class="evo-num">II</div>
+               </div>
+               <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
+               <div class="screen evo-name">metapod</div>
+            </div>
+            <div>
+               <div class="flex-center">
+                  <div class="evo-num">III</div>
+               </div>
+               <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
+               <div class="screen evo-name">butterfree</div>
+            </div>
+         </div>
+         <div class="panel-row blue-buttons">
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+            <div class="blue-button"></div>
+         </div>
+         <div class="move-list">
+            <div class="move-body move-screen screen">
+               <div class="move-left">
+                  <div class="move-name">electroweb</div>
+                  <div class="move-stat">
+                     Accuracy......95
+                  </div>
+                  <div class="move-stat">
+                     Power.........55
+                  </div>
+                  <div class="move-stat">
+                     PP............15
+                  </div>
+               </div>
+               <div class="move-right">
+                  <div class="move-type">Type: electric</div>
+                  <div class="move-learn">Learn: Lvl 0</div>
+               </div>
+            </div>
+            <div class="move-controls">
+               <div class="move-arrow"><i class="fas fa-caret-up"></i></div>
+               <div class="move-arrow"><i class="fas fa-caret-down"></i></div>
+            </div>
+         </div>
+         <div class="panel-row controls">
+            <div class="button"></div>
+            <div>
+               <input type="number" class="screen num-input" placeholder="11">
+               <div class="submit"></div>
+            </div>
+            <div class="button"></div>
+         </div>
+      </div>
+   </div>
+</ion-content>

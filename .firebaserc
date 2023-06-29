@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "pokedex-48b6b": {
+      "hosting": {
+        "app": [
+          "pokedex-48b6b"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "pokedex-48b6b"
+  }
+}

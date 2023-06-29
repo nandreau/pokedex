@@ -1,18 +1,38 @@
 import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
-  ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+  title = 'my-app';
+  title$ = new Observable(observer => {
+    setInterval(() => {
+      observer.next();
+    }, 2000);
+  });
+
+  constructor() {
+    this.title$.subscribe(this.setTitle);
+  }
+
+  private setTitle = () => {
+    const timestamp = new Date().getMilliseconds();
+    this.title = `Learning Angular (${timestamp})`;
+  }
+
+  private changeTitle(callback: Function) {
+    setTimeout(() => {
+      callback();
+    }, 2000);
+  }
+
+  private onComplete() {
+    return new Promise<void>(resolve => {
+      setInterval(() => {
+        resolve();
+      }, 2000);
+    });
+  }
 }
