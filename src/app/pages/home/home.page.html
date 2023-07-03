@@ -59,9 +59,9 @@
          </ng-template>
       </ion-modal>
 
-      <div class="pokedex">
+      <div class="pokedex" *ngIf="pokemonData">
          <div class="panel left-panel">
-            <div class="pokemon-name screen">metapod<span class="name-no">no. 11</span></div>
+            <div class="pokemon-name screen">{{pokemonData.name}}<span class="name-no">no. {{pokemonData.id}}</span></div>
             <div class="sprite-image">
                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png" alt="pokemon" class="pokemon-sprite">
                <div class="sprite-controls">
@@ -177,7 +177,7 @@
             <div class="panel-row controls">
                <div class="button"></div>
                <div>
-                  <input type="number" class="screen num-input" placeholder="11">
+                  <input [(ngModel)]="pokemonId" type="number" class="screen num-input" placeholder="1">
                   <div class="submit"></div>
                </div>
                <div class="button"></div>

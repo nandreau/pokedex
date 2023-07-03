@@ -10,6 +10,7 @@ import {
 } from '@ionic/angular';
 import { PokemonsService } from 'src/app/services/pokemons.service';
 import { ControllerService } from 'src/app/services/controller.service';
+import { Pokemon } from 'src/app/pokemons-type';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +30,8 @@ export class HomePage implements OnInit {
   reverted:boolean=false;
   idStart:number=1;
   idEnd:number=150;
+  pokemonData:Pokemon | null = null;
+  pokemonId=1;
   alert:string="";
   public alertInputsPokemons = [
     {
@@ -89,7 +92,11 @@ export class HomePage implements OnInit {
     if (result && result.idStart && result.idEnd){
       this.idStart = result.idStart;
       this.idEnd = result.idEnd
+      this.pokemonData = await this.pokemon.getPokemonData(this.idStart);
+    }else {
+      this.pokemonData = await this.pokemon.getPokemonData(1);
     }
+    console.log(this.pokemonData)
   }
 
   async logout() {

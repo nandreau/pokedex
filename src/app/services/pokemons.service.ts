@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Firestore, doc, runTransaction, DocumentReference } from '@angular/fire/firestore';
+import { Firestore, doc, runTransaction, DocumentReference, DocumentSnapshot, getDoc } from '@angular/fire/firestore';
 import { setDoc  } from '@firebase/firestore';
 import { firstValueFrom } from 'rxjs';
 import { Pokemon, PokemonType } from '../pokemons-type';
@@ -68,6 +68,21 @@ export class PokemonsService {
   
     await this.updateDocumentsSimultaneously(updates);
     this.ctrl.dismissLoader();
+  }
+
+  async getPokemonData(id: number): Promise<Pokemon | null> {
+    try {
+      const ref = doc(this.firestore, `pokemons/${id}`);
+      const snapshot: DocumentSnapshot<any> = await getDoc(ref);
+      if (snapshot.exists()) {
+        const pokemonData:Pokemon = snapshot.data();
+        return pokemonData;
+      }
+      return null;
+    } catch (e) {
+      console.error('Erreur lors de la récupération des données Pokémon: ', e);
+      return null;
+    }
   }
 
   async updateDocumentsSimultaneously(updates: { ref: DocumentReference, data: Pokemon }[]) {
