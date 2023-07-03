@@ -7,6 +7,7 @@ import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
 import { KeyLoggerComponent } from 'src/app/components/key-logger/key-logger.component';
 import { KeyLoggerModule } from 'src/app/components/key-logger/key-logger.module';
+import { HttpClientModule } from '@angular/common/http';
 
 
 @NgModule({
