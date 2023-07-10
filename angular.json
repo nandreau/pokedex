@@ -22,8 +22,8 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "src/assets/sounds",
-                "output": "/assets/sounds/"
+                "input": "src/assets",
+                "output": "/assets/"
               },
               {
                 "glob": "**/*.svg",

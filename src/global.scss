@@ -32,3 +32,11 @@ ion-toast {
     text-align: center;
     --max-width: 90% !important;
 }
+
+*:not(input,textarea,ion-input,.noCopy){
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

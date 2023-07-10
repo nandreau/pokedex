@@ -18,8 +18,6 @@ import { Pokemon } from 'src/app/pokemons-type';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-  presentingElement: HTMLIonRouterOutletElement;
-
   private sounds: { [key: string]: HTMLAudioElement } = {
     click: new Audio(),
     pch: new Audio(),
@@ -32,56 +30,13 @@ export class HomePage implements OnInit {
   idEnd:number=150;
   pokemonData:Pokemon | null = null;
   pokemonId=1;
-  alert:string="";
-  public alertInputsPokemons = [
-    {
-      name: 'startId',
-      type: 'number',
-      placeholder: 'Id de début',
-      min: 1,
-    },
-    {
-      name: 'endId',
-      type: 'number',
-      placeholder: 'Id de fin',
-      min: 1,
-    },
-  ];
-  public alertButtons = [
-    {
-      text: 'Annuler',
-      role: 'cancel',
-    },
-    {
-      text: 'Valider',
-      role: 'confirm',
-      handler: (value: id) => {
-        switch (this.alert) {
-          case "types":
-            this.pokemon.downloadTypes();
-            break;
-          case "pokemons":
-            const startId: number = parseInt(value.startId, 10);
-            const endId: number = parseInt(value.endId, 10);
-            if (startId > 0 && endId > 0 && startId <= endId){
-              this.pokemon.initPokemons(startId,endId);
-            } else {
-              this.ctrl.toast("Attention la tranche d'id des pokémons n'est pas correctement définit","warning");
-            }
-            break;
-        }
-      },
-    },
-  ];
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private routerOutlet: IonRouterOutlet,
     private pokemon: PokemonsService,
     private ctrl: ControllerService
   ) {
-    this.presentingElement = routerOutlet.nativeEl;
     this.sounds['click'].src = '../../assets/sounds/sons_bip.mp3';
     this.sounds['pch'].src = '../../assets/sounds/sons_pch.mp3';
     this.sounds['problem'].src = '../../assets/sounds/sons_problem.mp3';
@@ -93,19 +48,15 @@ export class HomePage implements OnInit {
       this.idStart = result.idStart;
       this.idEnd = result.idEnd
       this.pokemonData = await this.pokemon.getPokemonData(this.idStart);
+      this.pokemonId = this.idStart;
     }else {
       this.pokemonData = await this.pokemon.getPokemonData(1);
     }
-    console.log(this.pokemonData)
   }
 
   async logout() {
     this.authService.logout();
     this.router.navigateByUrl('/', { replaceUrl: true });
-  }
-
-  changeAlert(name: string){
-    this.alert = name;
   }
 
   changeImage(type: string) {
@@ -124,12 +75,51 @@ export class HomePage implements OnInit {
     }
   }
 
-  changeId(){
-    this.authService.updateId(this.idStart,this.idEnd)
+  getPokemonSprite() {
+    if (!this.reverted && !this.shiny && !this.female) {
+      return this.pokemonData?.sprites.front_default;
+    } else if (!this.reverted && !this.shiny && this.female) {
+      return this.pokemonData?.sprites.front_female || this.pokemonData?.sprites.front_default;
+    } else if (!this.reverted && this.shiny && !this.female) {
+      return this.pokemonData?.sprites.front_shiny;
+    } else if (!this.reverted && this.shiny && this.female) {
+      return this.pokemonData?.sprites.front_shiny_female || this.pokemonData?.sprites.front_shiny;
+    } else if (this.reverted && !this.shiny && !this.female) {
+      return this.pokemonData?.sprites.back_default;
+    } else if (this.reverted && !this.shiny && this.female) {
+      return this.pokemonData?.sprites.back_female || this.pokemonData?.sprites.back_default;
+    } else if (this.reverted && this.shiny && !this.female) {
+      return this.pokemonData?.sprites.back_shiny;
+    } else if (this.reverted && this.shiny && this.female) {
+      return this.pokemonData?.sprites.back_shiny_female || this.pokemonData?.sprites.back_shiny;
+    }else{
+      return this.pokemonData?.sprites.front_default;
+    }
+  }
+
+  async changeId(range:string){
+    console.log(range)
+    const result:id = JSON.parse(range)
+    if (result.startId && result.endId){
+      await this.authService.updateId(result.startId,result.endId)
+      this.idStart = result.startId;
+      this.idEnd = result.endId;
+      if (result.startId > this.pokemonId){
+        this.pokemonData = await this.pokemon.getPokemonData(result.startId);
+        this.pokemonId = result.startId;
+      }else if (result.endId < this.pokemonId){
+        this.pokemonData = await this.pokemon.getPokemonData(result.endId);
+        this.pokemonId =  result.endId;
+      }
+    }
+  }
+
+  setOpen(isOpen: boolean) {
+
   }
 }
 
 interface id {
-  endId:string;
-  startId:string;
+  endId:number;
+  startId:number;
 }

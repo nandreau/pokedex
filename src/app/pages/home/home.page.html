@@ -16,54 +16,12 @@
    </ion-header>
 
    <ion-content class="ion-padding">
-      <ion-modal #modal trigger="open-modal" [presentingElement]="presentingElement">
-         <ng-template>
-         <ion-header>
-            <ion-toolbar>
-               <ion-title>Options</ion-title>
-               <ion-buttons slot="end">
-               <ion-button (click)="modal.dismiss()">Close</ion-button>
-               </ion-buttons>
-            </ion-toolbar>
-         </ion-header>
-         <ion-content>
-            <ion-item id="pokemons-alert" detail="true" button="true">
-               <ion-label>Rafraichir la base de données</ion-label>
-            </ion-item>
-            <ion-item id="types-alert" detail="true" button="true">
-               <ion-label>Telécharger tous les types</ion-label>
-            </ion-item>
-            <ion-item>
-               <ion-input (ionChange)="changeId()" [(ngModel)]="idStart" label="Id de début :" type="number" placeholder="1" min="1"></ion-input>
-            </ion-item>
-            <ion-item>
-               <ion-input (ionChange)="changeId()" [(ngModel)]="idEnd" label="Id de fin :" type="number" placeholder="150" min="1"></ion-input>
-            </ion-item>
-         </ion-content>
-         <ion-alert
-            trigger="types-alert"
-            header="Confirmation"
-            message="Voulez-vous telecharger toutes les images de types des pokemon ?"
-            [buttons]="alertButtons"
-            (didPresent)="changeAlert('types')"
-         ></ion-alert>
-         
-         <ion-alert
-            trigger="pokemons-alert"
-            header="Confirmation"
-            message="Voulez-vous actualiser la base de de données des pokemons ? (Attention, cela peut prendre du temps)"
-            [buttons]="alertButtons"
-            [inputs]="alertInputsPokemons"
-            (didPresent)="changeAlert('pokemons')"
-         ></ion-alert>
-         </ng-template>
-      </ion-modal>
-
+      <app-options  (outputEvent)="changeId($event)"></app-options>
       <div class="pokedex" *ngIf="pokemonData">
          <div class="panel left-panel">
             <div class="pokemon-name screen">{{pokemonData.name}}<span class="name-no">no. {{pokemonData.id}}</span></div>
             <div class="sprite-image">
-               <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png" alt="pokemon" class="pokemon-sprite">
+               <img [src]="getPokemonSprite()" alt="pokemon" class="pokemon-sprite">
                <div class="sprite-controls">
                   <div (click)="changeImage('gender')" class="sprite-control sprite-controls-gender "><i class="fas fa-venus"></i></div>
                   <div (click)="changeImage('shiny')" class="sprite-control sprite-controls-shiny "><span>shiny</span></div>
@@ -89,29 +47,14 @@
          <div class="panel right-panel">
             <div class="panel-row">
                <div class="screen stats">
-                  <div class="stat-line">
-                     hp................50
+                  <div class="stat-line" *ngFor="let stat of pokemonData.stats">
+                    {{ stat.stat.name }}{{ '.'.repeat(20 - stat.stat.name.length - stat.base_stat.toString().length) }}{{ stat.base_stat }}
                   </div>
-                  <div class="stat-line">
-                     attack............20
-                  </div>
-                  <div class="stat-line">
-                     defense...........55
-                  </div>
-                  <div class="stat-line">
-                     special-attack....25
-                  </div>
-                  <div class="stat-line">
-                     special-defense...25
-                  </div>
-                  <div class="stat-line">
-                     speed.............30
-                  </div>
-               </div>
+                </div>
                <div class="type-list">
                   <div class="panel-header">Types</div>
                   <div class="type-box">
-                     <div class="type bug">bug</div>
+                     <img *ngFor="let type of pokemonData.types" class="type {{type.type.name}}" [src]="'../../../assets/types/'+type.type.name+'.png'">
                   </div>
                </div>
             </div>
@@ -134,10 +77,22 @@
                   <div class="flex-center">
                      <div class="evo-num">III</div>
                   </div>
-                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
+                  <div class="pokemon-sprite pokemon-sprite-small empty-evo">
+                     <div class="poke-ball">
+                        <div class="poke-ball-top">
+                        </div>
+                        <div class="poke-ball-center">
+                           <div class="poke-ball-dot">
+                           </div>
+                        </div>
+                        <div class="poke-ball-bottom">
+                        </div>
+                     </div>
+                  </div>
                   <div class="screen evo-name">butterfree</div>
                </div>
             </div>
+            
             <div class="panel-row blue-buttons">
                <div class="blue-button"></div>
                <div class="blue-button"></div>
