@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Firestore, doc, runTransaction, DocumentReference, DocumentSnapshot, getDoc } from '@angular/fire/firestore';
 import { setDoc  } from '@firebase/firestore';
 import { firstValueFrom } from 'rxjs';
-import { Pokemon, PokemonType } from '../pokemons-type';
+import { Move, Pokemon, PokemonType } from '../pokemons-type';
 import { ControllerService } from './controller.service';
 
 @Injectable({
@@ -70,13 +70,34 @@ export class PokemonsService {
     this.ctrl.dismissLoader();
   }
 
-  async getPokemonData(id: number): Promise<Pokemon | null> {
+  async initMoves(startId: number, endId: number) {
+    this.ctrl.loader(`0/${endId-startId+1} Attaques réccupérés...`);
+    const updates: { ref: DocumentReference, data: Pokemon }[] = [];
+  
+    for (let id = startId; id <= endId; id++) {
+      try {
+        const result: Pokemon = await firstValueFrom(this.http.get<Pokemon>(`https://pokeapi.co/api/v2/move/${id}`));
+        this.ctrl.updateString(`${id-startId+1}/${endId-startId+1} Attaques réccupérés...`);
+        const ref = doc(this.firestore, 'moves/' + id);
+        updates.push({ ref, data: result });
+      } catch (error) {
+        console.log(`Erreur lors de la récupération de l'attaque avec l'id : ${id}`);
+        this.ctrl.toast(`Erreur lors de la récupération de l'attaque avec l'id : ${id}`, 'warning');
+        break;
+      }
+    }
+  
+    await this.updateDocumentsSimultaneously(updates);
+    this.ctrl.dismissLoader();
+  }
+
+  async getData(id: number, collection: string) {
     try {
-      const ref = doc(this.firestore, `pokemons/${id}`);
+      const ref = doc(this.firestore, `${collection}/${id}`);
       const snapshot: DocumentSnapshot<any> = await getDoc(ref);
       if (snapshot.exists()) {
-        const pokemonData:Pokemon = snapshot.data();
-        return pokemonData;
+        const data = snapshot.data();
+        return data;
       }
       return null;
     } catch (e) {
@@ -84,6 +105,8 @@ export class PokemonsService {
       return null;
     }
   }
+
+  
 
   async updateDocumentsSimultaneously(updates: { ref: DocumentReference, data: Pokemon }[]) {
     const promises = updates.map(({ ref, data }) => {
@@ -111,7 +134,7 @@ export class PokemonsService {
           } catch (error) {
             console.log('Erreur lors de la mise à jour/création du document : ', error);
           } finally {
-            this.ctrl.updateString(`${successCount}/${totalCount} pokemons mis à jour...`);
+            this.ctrl.updateString(`${successCount}/${totalCount} mis à jour...`);
           }
         })
       );

@@ -11,6 +11,7 @@ import {
 import { PokemonsService } from 'src/app/services/pokemons.service';
 import { ControllerService } from 'src/app/services/controller.service';
 import { Pokemon } from 'src/app/pokemons-type';
+import { KnownMoveKeys, Move } from 'src/app/moves-type';
 
 @Component({
   selector: 'app-home',
@@ -29,7 +30,10 @@ export class HomePage implements OnInit {
   idStart:number=1;
   idEnd:number=150;
   pokemonData:Pokemon | null = null;
-  pokemonId=1;
+  pokemonId:number=1;
+  moveData:Move | null = null;
+  moveId:number=0;
+  statsMove: KnownMoveKeys[] = ['accuracy', 'power', 'pp'];
 
   constructor(
     private authService: AuthService,
@@ -47,10 +51,9 @@ export class HomePage implements OnInit {
     if (result && result.idStart && result.idEnd){
       this.idStart = result.idStart;
       this.idEnd = result.idEnd
-      this.pokemonData = await this.pokemon.getPokemonData(this.idStart);
+      this.pokemonData = await this.pokemon.getData(this.idStart, 'pokemons');
       this.pokemonId = this.idStart;
-    }else {
-      this.pokemonData = await this.pokemon.getPokemonData(1);
+      this.getMove();
     }
   }
 
@@ -60,8 +63,7 @@ export class HomePage implements OnInit {
   }
 
   changeImage(type: string) {
-    this.sounds['click'].load();
-    this.sounds['click'].play();
+    this.makeSound('click');
     switch (type) {
       case 'shiny':
         this.shiny=!this.shiny;
@@ -97,25 +99,45 @@ export class HomePage implements OnInit {
     }
   }
 
+  async getMove(){
+    if (this.pokemonData && this.pokemonData.types.length > 0){
+      const arrayUrl = this.pokemonData.moves[this.moveId].move.url.split('/');
+      this.moveData = await this.pokemon.getData(Number(arrayUrl[arrayUrl.length-2]), 'moves');
+    }
+  }
+
   async changeId(range:string){
-    console.log(range)
     const result:id = JSON.parse(range)
     if (result.startId && result.endId){
       await this.authService.updateId(result.startId,result.endId)
       this.idStart = result.startId;
       this.idEnd = result.endId;
       if (result.startId > this.pokemonId){
-        this.pokemonData = await this.pokemon.getPokemonData(result.startId);
+        this.pokemonData = await this.pokemon.getData(result.startId, 'pokemons');
         this.pokemonId = result.startId;
       }else if (result.endId < this.pokemonId){
-        this.pokemonData = await this.pokemon.getPokemonData(result.endId);
+        this.pokemonData = await this.pokemon.getData(result.endId, 'pokemons');
         this.pokemonId =  result.endId;
       }
     }
   }
 
-  setOpen(isOpen: boolean) {
+  selectMove(increment: number){
+    if (this.pokemonData){
+      if ((this.moveId <= 0 && increment === -1) ||
+        (this.moveId >= (this.pokemonData.moves.length - 1) && increment === 1)) {
+          this.makeSound('problem');
+      }else {
+        this.makeSound('click');
+        this.moveId = this.moveId + increment;
+        this.getMove();
+      }
+    }
+  }
 
+  makeSound(name: string){
+    this.sounds[name].load();
+    this.sounds[name].play();
   }
 }
 

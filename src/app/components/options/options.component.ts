@@ -15,7 +15,7 @@ export class OptionsComponent implements OnInit {
   alert: string = "";
   idStart: number = 1;
   idEnd: number = 150;
-  public alertInputsPokemons = [
+  public alertInputs = [
     {
       name: 'startId',
       type: 'number',
@@ -38,19 +38,23 @@ export class OptionsComponent implements OnInit {
       text: 'Valider',
       role: 'confirm',
       handler: (value: id) => {
-        switch (this.alert) {
-          case "types":
-            this.pokemon.downloadTypes();
-            break;
-          case "pokemons":
-            const startId: number = value.startId;
-            const endId: number = value.endId;
-            if (startId > 0 && endId > 0 && startId <= endId) {
-              this.pokemon.initPokemons(startId, endId);
-            } else {
-              this.ctrl.toast("Attention la tranche d'id des pokémons n'est pas correctement définit", "warning");
+        if (this.alert === 'types'){
+          this.pokemon.downloadTypes();
+        }else if (this.alert === 'pokemons' || this.alert === 'moves'){
+          const startId: number = value.startId;
+          const endId: number = value.endId;
+          if (startId > 0 && endId > 0 && startId <= endId) {
+            switch (this.alert) {
+              case 'pokemons':
+                this.pokemon.initPokemons(startId, endId);
+                break;
+              case 'moves':
+                this.pokemon.initMoves(startId, endId);
+                break;
             }
-            break;
+          } else {
+            this.ctrl.toast("Attention la tranche des ids n'est pas correctement définit", "warning");
+          }
         }
       },
     },

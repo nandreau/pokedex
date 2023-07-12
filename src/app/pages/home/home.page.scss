@@ -248,7 +248,16 @@ body {
         rgba(230, 230, 230, 0.5) 100%
     );
     background-blend-mode: hard-light;
-    max-height: 42px;
+    display: table;
+    span {
+      display: table-cell;
+      vertical-align: middle;
+      width: 100%;
+    }
+    img {
+      max-height: 42px;
+      margin: auto 5px;
+    }
   }
   .panel-header {
     text-transform: capitalize;
@@ -271,9 +280,6 @@ body {
     flex: 1;
   }
   .type-box {
-    display: flex;
-    flex: 1;
-    justify-content: space-evenly;
     background: linear-gradient(14deg, #afafaf 50%, #ffffff 80%, #afafaf 90%);
     border-top: groove #757575 3px;
   }
