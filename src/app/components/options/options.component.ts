@@ -17,13 +17,13 @@ export class OptionsComponent implements OnInit {
   idEnd: number = 150;
   public alertInputs = [
     {
-      name: 'startId',
+      name: 'idStart',
       type: 'number',
       placeholder: 'Id de début',
       min: 1,
     },
     {
-      name: 'endId',
+      name: 'idEnd',
       type: 'number',
       placeholder: 'Id de fin',
       min: 1,
@@ -38,22 +38,35 @@ export class OptionsComponent implements OnInit {
       text: 'Valider',
       role: 'confirm',
       handler: (value: id) => {
-        if (this.alert === 'types'){
+        if (this.alert === 'types') {
           this.pokemon.downloadTypes();
-        }else if (this.alert === 'pokemons' || this.alert === 'moves'){
-          const startId: number = value.startId;
-          const endId: number = value.endId;
-          if (startId > 0 && endId > 0 && startId <= endId) {
+        } else if (this.alert === 'pokemons' || this.alert === 'species' || this.alert === 'evolutions' || this.alert === 'moves') {
+          const idStart: number = Number(value.idStart);
+          const idEnd: number = Number(value.idEnd);
+          if (idStart > 0 && idEnd > 0 && idStart <= idEnd) {
+            let apiEndpoint: string;
+            let nameLoader: string;
             switch (this.alert) {
               case 'pokemons':
-                this.pokemon.initPokemons(startId, endId);
+                apiEndpoint = 'https://pokeapi.co/api/v2/pokemon';
+                nameLoader= 'pokemons';
+                break;
+              case 'species':
+                apiEndpoint = 'https://pokeapi.co/api/v2/pokemon-species';
+                nameLoader= 'espèces';
+                break;
+              case 'evolutions':
+                apiEndpoint = 'https://pokeapi.co/api/v2/evolution-chain';
+                nameLoader= 'évolutions';
                 break;
               case 'moves':
-                this.pokemon.initMoves(startId, endId);
+                apiEndpoint = 'https://pokeapi.co/api/v2/move';
+                nameLoader= 'attaque';
                 break;
             }
+            this.pokemon.initData(idStart, idEnd, apiEndpoint, this.alert, nameLoader);
           } else {
-            this.ctrl.toast("Attention la tranche des ids n'est pas correctement définit", "warning");
+            this.ctrl.toast("Attention la tranche des ids n'est pas correctement définie", "warning");
           }
         }
       },
@@ -67,7 +80,9 @@ export class OptionsComponent implements OnInit {
     this.presentingElement = routerOutlet.nativeEl;
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+
+  }
 
   changeAlert(name: string) {
     this.alert = name;
@@ -75,11 +90,11 @@ export class OptionsComponent implements OnInit {
 
   async changeId() {
     console.log('test')
-    this.outputEvent.next(JSON.stringify({startId:this.idStart,endId: this.idEnd}));
+    this.outputEvent.next(JSON.stringify({idStart:this.idStart,idEnd: this.idEnd}));
   }
 }
 
 interface id {
-  endId: number;
-  startId: number;
+  idEnd: number;
+  idStart: number;
 }

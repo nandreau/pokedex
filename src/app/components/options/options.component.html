@@ -12,8 +12,14 @@
         <ion-item id="pokemons-alert" detail="true" button="true">
             <ion-label>Rafraichir les pokémons</ion-label>
         </ion-item>
+        <ion-item id="species-alert" detail="true" button="true">
+          <ion-label>Rafraichir les espèces</ion-label>
+        </ion-item>
         <ion-item id="moves-alert" detail="true" button="true">
           <ion-label>Rafraichir les attaques</ion-label>
+        </ion-item>
+        <ion-item id="evolutions-alert" detail="true" button="true">
+          <ion-label>Rafraichir les évolutions</ion-label>
         </ion-item>
         <ion-item id="types-alert" detail="true" button="true">
             <ion-label>Telécharger tous les types</ion-label>
@@ -40,6 +46,24 @@
         [buttons]="alertButtons"
         [inputs]="alertInputs"
         (didPresent)="changeAlert('pokemons')"
+      ></ion-alert>
+
+      <ion-alert
+        trigger="species-alert"
+        header="Confirmation"
+        message="Voulez-vous actualiser la base de de données des espèces ? (Attention, cela peut prendre du temps)"
+        [buttons]="alertButtons"
+        [inputs]="alertInputs"
+        (didPresent)="changeAlert('species')"
+      ></ion-alert>
+
+      <ion-alert
+        trigger="evolutions-alert"
+        header="Confirmation"
+        message="Voulez-vous actualiser la base de de données des évolutions ? (Attention, cela peut prendre du temps)"
+        [buttons]="alertButtons"
+        [inputs]="alertInputs"
+        (didPresent)="changeAlert('evolutions')"
       ></ion-alert>
 
       <ion-alert

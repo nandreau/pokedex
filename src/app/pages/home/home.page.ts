@@ -10,8 +10,10 @@ import {
 } from '@ionic/angular';
 import { PokemonsService } from 'src/app/services/pokemons.service';
 import { ControllerService } from 'src/app/services/controller.service';
-import { Pokemon } from 'src/app/pokemons-type';
-import { KnownMoveKeys, Move } from 'src/app/moves-type';
+import { Pokemon } from 'src/app/models/pokemons-type';
+import { KnownMoveKeys, Move } from 'src/app/models/moves-type';
+import { Specie } from 'src/app/models/species-types';
+import { Chain, Evolution } from 'src/app/models/evolutions-types';
 
 @Component({
   selector: 'app-home',
@@ -27,11 +29,12 @@ export class HomePage implements OnInit {
   shiny:boolean=false;
   female:boolean=false;
   reverted:boolean=false;
-  idStart:number=1;
-  idEnd:number=150;
+  range:Id={idStart:1,idEnd:150};
   pokemonData:Pokemon | null = null;
-  pokemonId:number=1;
+  specieData:Specie | null = null;
+  evolutionArray: CardPokemon[] | [] = [];
   moveData:Move | null = null;
+  pokemonId:number=1;
   moveId:number=0;
   statsMove: KnownMoveKeys[] = ['accuracy', 'power', 'pp'];
 
@@ -47,14 +50,21 @@ export class HomePage implements OnInit {
   }
 
   async ngOnInit(){
-    const result = await this.authService.getIdStartAndEnd();
-    if (result && result.idStart && result.idEnd){
-      this.idStart = result.idStart;
-      this.idEnd = result.idEnd
-      this.pokemonData = await this.pokemon.getData(this.idStart, 'pokemons');
-      this.pokemonId = this.idStart;
-      this.getMove();
+    const range = await this.authService.getIdStartAndEnd();
+    if (range){
+      this.initPokedex(this.range.idStart);
     }
+  }
+
+  async initPokedex(id: number){
+    this.pokemonData = await this.pokemon.getData(id, 'pokemons');
+      this.specieData = await this.pokemon.getData(id, 'species');
+      if (this.specieData && this.specieData.evolution_chain){
+        const evolutionData: Evolution = await this.pokemon.getData(this.getIndex(this.specieData.evolution_chain.url), 'evolutions');
+        this.evolutionArray = this.getEvolutionNames(evolutionData);
+      }
+      this.pokemonId = id;
+      this.getMove();
   }
 
   async logout() {
@@ -101,25 +111,61 @@ export class HomePage implements OnInit {
 
   async getMove(){
     if (this.pokemonData && this.pokemonData.types.length > 0){
-      const arrayUrl = this.pokemonData.moves[this.moveId].move.url.split('/');
-      this.moveData = await this.pokemon.getData(Number(arrayUrl[arrayUrl.length-2]), 'moves');
+      const url:string = this.pokemonData.moves[this.moveId].move.url;
+      this.moveData = await this.pokemon.getData(Number(this.getIndex(url)), 'moves');
     }
   }
 
+  getIndex(url: string): number {
+    const regex = /\/(\d+)\//;
+    const match = url.match(regex);
+  
+    if (match && match[1]) {
+      const index = Number(match[1]);
+      return index;
+    }
+  
+    console.log('Index not found in the URL.');
+    return 0;
+  }
+
   async changeId(range:string){
-    const result:id = JSON.parse(range)
-    if (result.startId && result.endId){
-      await this.authService.updateId(result.startId,result.endId)
-      this.idStart = result.startId;
-      this.idEnd = result.endId;
-      if (result.startId > this.pokemonId){
-        this.pokemonData = await this.pokemon.getData(result.startId, 'pokemons');
-        this.pokemonId = result.startId;
-      }else if (result.endId < this.pokemonId){
-        this.pokemonData = await this.pokemon.getData(result.endId, 'pokemons');
-        this.pokemonId =  result.endId;
+    this.range = JSON.parse(range)
+    if (this.range.idStart && this.range.idEnd){
+      await this.authService.updateId(this.range.idStart,this.range.idEnd)
+      if (this.range.idStart > this.pokemonId){
+        this.pokemonData = await this.pokemon.getData(this.range.idStart, 'pokemons');
+        this.pokemonId = this.range.idStart;
+      }else if (this.range.idEnd < this.pokemonId){
+        this.pokemonData = await this.pokemon.getData(this.range.idEnd, 'pokemons');
+        this.pokemonId =  this.range.idEnd;
       }
     }
+  }
+
+  getEvolutionNames(evolutionData: Evolution): CardPokemon[] {
+    if (evolutionData) {
+      const evolutionNames: CardPokemon[] = [];
+
+      const processEvolutionChain = (chain: Chain) => {
+        if (chain && chain.species && chain.species.name && chain.species.url) {
+          const cardPokemon: CardPokemon = {
+            name: chain.species.name,
+            urlImage: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+this.getIndex(chain.species.url)+'.png'
+          };
+          evolutionNames.push(cardPokemon);
+        }
+        
+        if (chain && chain.evolves_to && chain.evolves_to.length > 0) {
+          for (const evolution of chain.evolves_to) {
+            processEvolutionChain(evolution);
+          }
+        }
+      };
+      processEvolutionChain(evolutionData.chain);
+      return evolutionNames;
+    }  
+    return [];
   }
 
   selectMove(increment: number){
@@ -135,13 +181,43 @@ export class HomePage implements OnInit {
     }
   }
 
+  selectPokemon(increment: number){
+    if (this.pokemonData){
+      if ((this.pokemonId <= this.range.idStart && increment === -1) ||
+        (this.pokemonId >= this.range.idEnd && increment === 1)) {
+          this.makeSound('problem');
+      }else {
+        this.makeSound('pch');
+        this.pokemonId = this.pokemonId + increment;
+        this.initPokedex(this.pokemonId);
+      }
+    }
+  }
+
   makeSound(name: string){
     this.sounds[name].load();
     this.sounds[name].play();
   }
+
+  getArrayLeft(){
+    const array: string[] = [];
+    for (let i=this.evolutionArray.length;i<3;i++){
+      array.push(this.getromanNumerals(i));
+    }
+    return array;
+  }
+
+  getromanNumerals(iteration: number):string {
+    return 'I'.repeat(iteration);
+  }
 }
 
-interface id {
-  endId:number;
-  startId:number;
+interface Id {
+  idEnd:number;
+  idStart:number;
+}
+
+interface CardPokemon {
+  name:string;
+  urlImage:string;
 }

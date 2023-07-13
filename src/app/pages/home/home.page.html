@@ -17,7 +17,7 @@
 
    <ion-content class="ion-padding">
       <app-options  (outputEvent)="changeId($event)"></app-options>
-      <div class="pokedex" *ngIf="pokemonData">
+      <div class="pokedex" *ngIf="pokemonData && specieData">
          <div class="panel left-panel">
             <div class="pokemon-name screen">{{pokemonData.name}}<span class="name-no">no. {{pokemonData.id}}</span></div>
             <div class="sprite-image">
@@ -28,11 +28,7 @@
                   <div (click)="changeImage('rotate')" class="sprite-control sprite-controls-rotate "><i class="fas fa-undo"></i></div>
                </div>
             </div>
-            <div class="pokemon-description screen">This is its pre-
-               evolved form. At
-               this stage, it canonly harden, so it
-               remains motionless
-               to avoid attack.
+            <div *ngIf="specieData.flavor_text_entries && specieData.flavor_text_entries.length > 0" class="pokemon-description screen" [innerHTML]="specieData.flavor_text_entries[0].flavor_text">
             </div>
          </div>
          <div class="divider">
@@ -62,40 +58,32 @@
                </div>
             </div>
             <div class="panel-row panel-evo">
-               <div>
+               <div *ngFor="let evolution of evolutionArray; let i = index">
                   <div class="flex-center">
-                     <div class="evo-num">I</div>
+                    <div class="evo-num">{{ getromanNumerals(i+1) }}</div>
                   </div>
-                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
-                  <div class="screen evo-name">caterpie</div>
+                  <img [src]="evolution.urlImage" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
+                  <div class="screen evo-name">{{ evolution.name }}</div>
                </div>
-               <div>
-                  <div class="flex-center">
-                     <div class="evo-num">II</div>
-                  </div>
-                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png" alt="pokemon" class="pokemon-sprite pokemon-sprite-small">
-                  <div class="screen evo-name">metapod</div>
-               </div>
-               <div>
-                  <div class="flex-center">
-                     <div class="evo-num">III</div>
-                  </div>
-                  <div class="pokemon-sprite pokemon-sprite-small empty-evo">
-                     <div class="poke-ball">
-                        <div class="poke-ball-top">
-                        </div>
+                
+               <div *ngFor="let num of getArrayLeft()">
+                  <div>
+                    <div class="flex-center">
+                      <div class="evo-num">{{num}}</div>
+                    </div>
+                    <div class="pokemon-sprite pokemon-sprite-small empty-evo">
+                      <div class="poke-ball">
+                        <div class="poke-ball-top"></div>
                         <div class="poke-ball-center">
-                           <div class="poke-ball-dot">
-                           </div>
+                          <div class="poke-ball-dot"></div>
                         </div>
-                        <div class="poke-ball-bottom">
-                        </div>
-                     </div>
+                        <div class="poke-ball-bottom"></div>
+                      </div>
+                    </div>
+                    <div class="screen evo-name">???</div>
                   </div>
-                  <div class="screen evo-name">butterfree</div>
                </div>
             </div>
-            
             <div class="panel-row blue-buttons">
                <div class="blue-button"></div>
                <div class="blue-button"></div>
@@ -132,12 +120,12 @@
                </div>
             </div>
             <div class="panel-row controls">
-               <div class="button"></div>
+               <div class="button" (click)="selectPokemon(-1)"></div>
                <div>
                   <input [(ngModel)]="pokemonId" type="number" class="screen num-input" placeholder="1">
                   <div class="submit"></div>
                </div>
-               <div class="button"></div>
+               <div class="button" (click)="selectPokemon(1)"></div>
             </div>
          </div>
       </div>

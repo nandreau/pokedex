@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Firestore, doc, runTransaction, DocumentReference, DocumentSnapshot, getDoc } from '@angular/fire/firestore';
 import { setDoc  } from '@firebase/firestore';
 import { firstValueFrom } from 'rxjs';
-import { Move, Pokemon, PokemonType } from '../pokemons-type';
+import { Move, Pokemon, PokemonType } from '../models/pokemons-type';
 import { ControllerService } from './controller.service';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class PokemonsService {
     private firestore: Firestore) {}
 
   async downloadImage(imageUrl: string, imageName: string) {
-    const response = await this.http.get(imageUrl, { responseType: 'blob' }).toPromise();
+    const response = await firstValueFrom(this.http.get(imageUrl, { responseType: 'blob' }));
     
     if (!response) {
       console.log(`Erreur lors du téléchargement de l'image ${imageName}.png`);
@@ -49,45 +49,27 @@ export class PokemonsService {
     }
   }
 
-  async initPokemons(startId: number, endId: number) {
-    this.ctrl.loader(`0/${endId-startId+1} pokemons réccupérés...`);
-    const updates: { ref: DocumentReference, data: Pokemon }[] = [];
+  async initData(idStart: number, idEnd: number, apiEndpoint: string, collectionName: string, nameLoader: string) {
+    const loadingMessage = `0/${idEnd - idStart + 1} ${nameLoader} récupérés...`;
+    const errorMessage = `Erreur lors de la récupération des ${nameLoader} avec l'id :`;
   
-    for (let id = startId; id <= endId; id++) {
+    this.ctrl.loader(loadingMessage);
+    const updates: { ref: DocumentReference, data: any }[] = [];
+  
+    for (let id = idStart; id <= idEnd; id++) {
       try {
-        const result: Pokemon = await firstValueFrom(this.http.get<Pokemon>(`https://pokeapi.co/api/v2/pokemon/${id}`));
-        this.ctrl.updateString(`${id-startId+1}/${endId-startId+1} pokemons réccupérés...`);
-        const ref = doc(this.firestore, 'pokemons/' + id);
+        const result: any = await firstValueFrom(this.http.get<any>(`${apiEndpoint}/${id}`));
+        this.ctrl.updateString(`${id - idStart + 1}/${idEnd - idStart + 1} ${nameLoader} récupérés...`);
+        const ref = doc(this.firestore, `${collectionName}/${id}`);
         updates.push({ ref, data: result });
       } catch (error) {
-        console.log(`Erreur lors de la récupération de Pokemon avec l'id : ${id}`);
-        this.ctrl.toast(`Erreur lors de la récupération de Pokemon avec l'id : ${id}`, 'warning');
+        console.log(`${errorMessage} ${id}`);
+        this.ctrl.toast(`${errorMessage} ${id}`, 'warning');
         break;
       }
     }
   
-    await this.updateDocumentsSimultaneously(updates);
-    this.ctrl.dismissLoader();
-  }
-
-  async initMoves(startId: number, endId: number) {
-    this.ctrl.loader(`0/${endId-startId+1} Attaques réccupérés...`);
-    const updates: { ref: DocumentReference, data: Pokemon }[] = [];
-  
-    for (let id = startId; id <= endId; id++) {
-      try {
-        const result: Pokemon = await firstValueFrom(this.http.get<Pokemon>(`https://pokeapi.co/api/v2/move/${id}`));
-        this.ctrl.updateString(`${id-startId+1}/${endId-startId+1} Attaques réccupérés...`);
-        const ref = doc(this.firestore, 'moves/' + id);
-        updates.push({ ref, data: result });
-      } catch (error) {
-        console.log(`Erreur lors de la récupération de l'attaque avec l'id : ${id}`);
-        this.ctrl.toast(`Erreur lors de la récupération de l'attaque avec l'id : ${id}`, 'warning');
-        break;
-      }
-    }
-  
-    await this.updateDocumentsSimultaneously(updates);
+    await this.updateDocumentsSimultaneously(updates, nameLoader);
     this.ctrl.dismissLoader();
   }
 
@@ -101,14 +83,12 @@ export class PokemonsService {
       }
       return null;
     } catch (e) {
-      console.error('Erreur lors de la récupération des données Pokémon: ', e);
+      console.error('Erreur lors de la récupération des données: ', e);
       return null;
     }
   }
 
-  
-
-  async updateDocumentsSimultaneously(updates: { ref: DocumentReference, data: Pokemon }[]) {
+  async updateDocumentsSimultaneously(updates: { ref: DocumentReference, data: Pokemon }[], nameLoader: string) {
     const promises = updates.map(({ ref, data }) => {
       return runTransaction(this.firestore, async (transaction) => {
         const snapshot = await transaction.get(ref);
@@ -134,12 +114,12 @@ export class PokemonsService {
           } catch (error) {
             console.log('Erreur lors de la mise à jour/création du document : ', error);
           } finally {
-            this.ctrl.updateString(`${successCount}/${totalCount} mis à jour...`);
+            this.ctrl.updateString(`${successCount}/${totalCount} ${nameLoader} mis à jour...`);
           }
         })
       );
     
-      this.ctrl.toast('La base de données a été mise à jour !', 'success');
+      this.ctrl.toast(`La base de données des  ${nameLoader} a été mise à jour !`, 'success');
     } catch (error) {
       console.log('Erreur lors de la mise à jour/création du document : ', error);
       this.ctrl.toast('Erreur lors de la mise à jour/création du document', 'error');
