@@ -111,7 +111,7 @@
                   </div>
                   <div class="move-right">
                      <div class="move-type">Type: {{ moveData.type.name }}</div>
-                     <div class="move-learn">Learn: Lvl {{pokemonData.moves[this.moveId].version_group_details[0].level_learned_at}}</div>
+                     <div *ngIf="pokemonData.moves" class="move-learn">Learn: Lvl {{pokemonData.moves[this.moveId].version_group_details[0].level_learned_at}}</div>
                   </div>
                </div>
                <div class="move-controls">
@@ -122,7 +122,7 @@
             <div class="panel-row controls">
                <div class="button" (click)="selectPokemon(-1)"></div>
                <div>
-                  <input [(ngModel)]="pokemonId" type="number" class="screen num-input" placeholder="1">
+                  <input (input)="initPokedex(pokemonId)" [(ngModel)]="pokemonId" type="number" class="screen num-input" placeholder="1">
                   <div class="submit"></div>
                </div>
                <div class="button" (click)="selectPokemon(1)"></div>

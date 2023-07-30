@@ -23,7 +23,6 @@ export class LoginPage {
     private router: Router
   ) {}
 
-  // Easy access for form fields
   get email() {
     return this.credentials.controls.email;
   }
@@ -65,18 +64,6 @@ export class LoginPage {
     } else {
       this.showAlert('Login failed', 'Please try again!');
     }
-  }
-
-  async sendReset() {
-    const loading = await this.loadingController.create();
-    await loading.present();
-    await this.authService.resetPw(this.email.value);
-    await loading.dismiss();
-
-    this.showAlert(
-      'Email sent',
-      'Please check your inbox for next steps to reset your password!'
-    );
   }
 
   async showAlert(header: string, message: string) {

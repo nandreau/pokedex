@@ -56,15 +56,19 @@ export class HomePage implements OnInit {
     }
   }
 
-  async initPokedex(id: number){
-    this.pokemonData = await this.pokemon.getData(id, 'pokemons');
-      this.specieData = await this.pokemon.getData(id, 'species');
-      if (this.specieData && this.specieData.evolution_chain){
-        const evolutionData: Evolution = await this.pokemon.getData(this.getIndex(this.specieData.evolution_chain.url), 'evolutions');
-        this.evolutionArray = this.getEvolutionNames(evolutionData);
-      }
-      this.pokemonId = id;
-      this.getMove();
+  async initPokedex(id: number) {
+    this.pokemonId = id;
+    const pokemonDataPromise = this.pokemon.getData(id, 'pokemons');
+    const specieDataPromise = this.pokemon.getData(id, 'species');
+  
+    this.pokemonData = await pokemonDataPromise;
+    this.specieData = await specieDataPromise;
+  
+    if (this.specieData && this.specieData.evolution_chain) {
+      const evolutionData: Evolution = await this.pokemon.getData(this.getIndex(this.specieData.evolution_chain.url), 'evolutions');
+      this.evolutionArray = this.getEvolutionNames(evolutionData);
+    }
+    this.getMove();
   }
 
   async logout() {
@@ -175,22 +179,22 @@ export class HomePage implements OnInit {
           this.makeSound('problem');
       }else {
         this.makeSound('click');
-        this.moveId = this.moveId + increment;
+        this.moveId += increment;
         this.getMove();
       }
     }
   }
 
-  selectPokemon(increment: number){
-    if (this.pokemonData){
+  selectPokemon(increment: number) {
+    if (this.pokemonData) {
       if ((this.pokemonId <= this.range.idStart && increment === -1) ||
         (this.pokemonId >= this.range.idEnd && increment === 1)) {
-          this.makeSound('problem');
-      }else {
-        this.makeSound('pch');
-        this.pokemonId = this.pokemonId + increment;
-        this.initPokedex(this.pokemonId);
+        this.makeSound('problem');
+        return;
       }
+      this.makeSound('pch');
+      this.pokemonId += increment;
+      this.initPokedex(this.pokemonId);
     }
   }
 
